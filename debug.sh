@@ -1,1 +1,1 @@
-bochs -f bochs_config
+qemu-system-x86_64 -kernel build/boot.bin -no-reboot -no-shutdown -d int,cpu_reset -D qemu.log

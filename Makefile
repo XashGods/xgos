@@ -1,43 +1,40 @@
-ASM=nasm
-
 SRC_DIR=src
 BUILD_DIR=build
 
 .PHONY: all kernel bootloader clean always 
 
 # bootloader
-bootloader: stage1 stage2 create_image
+bootloader: boot create_image
 
-stage1: $(BUILD_DIR)/stage1.bin
+boot: $(BUILD_DIR)/boot.bin
 
-$(BUILD_DIR)/stage1.bin: always
-	$(MAKE) -C $(SRC_DIR)/bootloader/stage1 BUILD_DIR=$(abspath $(BUILD_DIR))
-
-stage2: $(BUILD_DIR)/stage2.bin
-
-$(BUILD_DIR)/stage2.bin: always
-	$(MAKE) -C $(SRC_DIR)/bootloader/stage2 BUILD_DIR=$(abspath $(BUILD_DIR))
+$(BUILD_DIR)/boot.bin: always
+	$(MAKE) -C $(SRC_DIR)/bootloader BUILD_DIR=$(abspath $(BUILD_DIR)) SRC_DIR=$(abspath $(SRC_DIR))
 
 # kernel
 kernel: $(BUILD_DIR)/kernel.bin
 
 $(BUILD_DIR)/kernel.bin: always
-	$(MAKE) -C $(SRC_DIR)/kernel BUILD_DIR=$(abspath $(BUILD_DIR))
+	$(MAKE) -C $(SRC_DIR)/kernel BUILD_DIR=$(abspath $(BUILD_DIR)) SRC_DIR=$(abspath $(SRC_DIR))
 
 # always
 always:
 	mkdir -p $(BUILD_DIR)
 
 create_image: bootloader kernel
-	dd if=/dev/zero of=$(BUILD_DIR)/main_floppy.img bs=512 count=2880
-	mkfs.fat -F 12 -n "NBOS" $(BUILD_DIR)/main_floppy.img
-	dd if=$(BUILD_DIR)/stage1.bin of=$(BUILD_DIR)/main_floppy.img conv=notrunc
-	mcopy -i $(BUILD_DIR)/main_floppy.img $(BUILD_DIR)/stage2.bin "::stage2.bin"
+	mkdir -p $(BUILD_DIR)/isodir/boot/grub
+	sudo cp $(BUILD_DIR)/boot.bin $(BUILD_DIR)/isodir/boot/os.bin
+	echo 'set timeout=0' > $(BUILD_DIR)/isodir/boot/grub/grub.cfg
+	echo 'set default=0' >> $(BUILD_DIR)/isodir/boot/grub/grub.cfg
+	echo '' >> $(BUILD_DIR)/isodir/boot/grub/grub.cfg
+	echo 'menuentry "xgOS" {' >> $(BUILD_DIR)/isodir/boot/grub/grub.cfg
+	echo '  multiboot /boot/os.bin' >> $(BUILD_DIR)/isodir/boot/grub/grub.cfg
+	echo '}' >> $(BUILD_DIR)/isodir/boot/grub/grub.cfg
+	sudo grub-mkrescue -o build/os.iso $(BUILD_DIR)/isodir
 
 
 # clean
 clean:
-	$(MAKE) -C $(SRC_DIR)/bootloader/stage1 BUILD_DIR=$(abspath $(BUILD_DIR)) clean
-	$(MAKE) -C $(SRC_DIR)/bootloader/stage2 BUILD_DIR=$(abspath $(BUILD_DIR)) clean
+	$(MAKE) -C $(SRC_DIR)/bootloader BUILD_DIR=$(abspath $(BUILD_DIR)) clean
 	$(MAKE) -C $(SRC_DIR)/kernel BUILD_DIR=$(abspath $(BUILD_DIR)) clean
 	rm -rf $(BUILD_DIR)/*
