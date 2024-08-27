@@ -1,1 +1,1 @@
-qemu-system-i386 -cdrom build/os.iso
+qemu-system-i386 -fda build/main_floppy.img

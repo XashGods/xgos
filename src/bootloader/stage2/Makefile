@@ -1,10 +1,10 @@
 BUILD_DIR?=build/
 
 C?=gcc
-CFLAGS := -m32 -ffreestanding -O2 -Wall -Wextra -v -nostdlib -fno-pie
+CFLAGS := -m16 -ffreestanding -O2 -Wall -Wextra -nostdlib -fno-pie
 
 CXX?=g++
-CXXFLAGS?=-m32 -Wall -Wextra -g -fno-pie -fno-exceptions -nostdlib -fno-rtti -ffreestanding -nostdlib -fno-use-cxa-atexit -fno-builtin -Iinclude -fno-leading-underscore
+CXXFLAGS?=-m16 -Wall -Wextra -g -fno-pie -fno-exceptions -nostdlib -fno-rtti -ffreestanding -nostdlib -fno-use-cxa-atexit -fno-builtin -Iinclude -fno-leading-underscore
 
 LD?=ld
 LDFLAGS?=-m elf_i386 -T linker.ld
@@ -38,7 +38,7 @@ $(BUILD_DIR)/stage2/asm/%.o: %.asm always
 stage2: $(BUILD_DIR)/stage2.bin
 
 $(BUILD_DIR)/stage2.bin: $(OBJECTS_ASM) $(OBJECTS_CPP) $(OBJECTS_C)
-	$(LD) $(LDFLAGS) -o $@ $^ -Map=$(BUILD_DIR)/stage2.map
+	$(LD) $(LDFLAGS) -o $@ $^
 
 $(BUILD_DIR)/stage2.bin: $(BUILD_DIR)/stage2.bin
 	objcopy -O binary $< $@

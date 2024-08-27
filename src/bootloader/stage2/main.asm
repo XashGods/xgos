@@ -1,33 +1,24 @@
 bits 16
+cpu 386
 
-section .multiboot
-    align 4
-    dd 0x1BADB002              ; magic number
-    dd 0x00                    ; flags
-    dd - (0x1BADB002 + 0x00)   ; checksum
+section _ENTRY class=CODE
 
-section .text
-
-global _start
 extern cstart_
+global entry
 
-_start:
+entry:
     cli
-    xor ax, ax
+    ; setup stack
+    mov ax, ds
     mov ss, ax
-    mov sp, 0x7C00
+    mov sp, 0
+    mov bp, sp
     sti
 
-    mov ax, 0
-    mov ds, ax
-    mov es, ax
-
+    ; expect boot drive in dl, send it as argument to cstart function
     xor dh, dh
     push dx
     call cstart_
 
     cli
     hlt
-
-times 510-($-$$) db 0
-dw 0xAA55

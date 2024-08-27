@@ -1,8 +1,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
-void cstart_(uint16_t bootDrive)
+extern void cstart_(uint8_t drive)
 {
-    puts("Hello world from C!\r\n");
+    puts("Stage 2 bootloader started");
+
     for (;;);
 }
