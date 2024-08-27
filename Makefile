@@ -37,7 +37,7 @@ create_image: always
 	echo 'menuentry "xgOS" {' >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
 	echo '  multiboot /boot/os.bin' >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
 	echo '}' >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
-	sudo grub-mkrescue -o os.iso $(BUILD_DIR)/iso
+	sudo grub-mkrescue -o $(BUILD_DIR)/os.iso $(BUILD_DIR)/iso
 	rm -rf $(BUILD_DIR)/iso	
 
 # dd if=/dev/zero of=$(BUILD_DIR)/main_floopy.img bs=512 count=2880
