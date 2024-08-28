@@ -8,7 +8,7 @@ bootloader: boot create_image
 
 boot: $(BUILD_DIR)/boot.bin
 
-$(BUILD_DIR)/boot.bin: always
+$(BUILD_DIR)/boot.bin: kernel
 	$(MAKE) -C $(SRC_DIR)/bootloader BUILD_DIR=$(abspath $(BUILD_DIR)) SRC_DIR=$(abspath $(SRC_DIR))
 
 # kernel

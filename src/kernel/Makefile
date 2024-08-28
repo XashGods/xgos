@@ -1,14 +1,20 @@
+SRC_DIR?=src/
 BUILD_DIR?=build/
-ASM?=nasm
+CXX=i386-elf-g++
+CXXFLAGS?= -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti
 
-.PHONY: all kernel clean
+SOURCES_CPP=$(wildcard *.cpp)
+OBJECTS_CPP=$(patsubst %.cpp, $(BUILD_DIR)/boot/cpp/%.o, $(SOURCES_CPP))
 
-all: kernel
+.PHONY: all always clean
 
-kernel: $(BUILD_DIR)/kernel.bin
+all: always $(OBJECTS_CPP)
 
-$(BUILD_DIR)/kernel.bin:
-	$(ASM) main.asm -f bin -o $(BUILD_DIR)/kernel.bin
+$(BUILD_DIR)/boot/cpp/%.o: %.cpp always
+	$(CXX) -c $< -o $@ $(CXXFLAGS)
+
+always:
+	mkdir -p $(BUILD_DIR)/boot/cpp
 
 clean:
-	rm -rf $(BUILD_DIR)/kernel.bin
+	rm -rf $(BUILD_DIR)/boot/cpp
