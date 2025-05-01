@@ -10,6 +10,11 @@ section .text
 
     global _start
     extern kernel_main
+    extern init_global_ctors
 
 _start:
-    jmp kernel_main                 ; Jump to C++ kernel entry point
+    ; Preserve multiboot magic (in EAX) while calling constructors
+    push eax
+    call init_global_ctors
+    pop eax
+    call kernel_main      ; Jump to C++ kernel entry point

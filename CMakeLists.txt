@@ -13,6 +13,8 @@ enable_language(ASM_NASM)
 
 add_executable(kernel
         src/boot.asm
+        src/init.cpp
+        src/console.cpp
         src/kernel.cpp
         linker.ld
 )
