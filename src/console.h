@@ -10,6 +10,9 @@ extern "C" {
     void kputc(char c);
     void kprintf(const char* format, ...);
 
+    // panic message and halt
+    void panic(const char* msg);
+
 #ifdef __cplusplus
 }
 #endif

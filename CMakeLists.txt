@@ -15,6 +15,8 @@ add_executable(kernel
         src/boot.asm
         src/init.cpp
         src/console.cpp
+        src/memory.cpp
+        src/paging.cpp
         src/kernel.cpp
         linker.ld
 )

@@ -99,3 +99,9 @@ void kprintf(const char* format, ...) {
     }
     va_end(args);
 }
+
+// panic message and halt
+void panic(const char* msg) {
+    kprintf("PANIC: %s\n", msg);
+    for (;;) {}
+}
