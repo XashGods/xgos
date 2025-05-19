@@ -6,7 +6,6 @@
 // Multiboot loader magic value passed in EAX
 static const uint32_t MULTIBOOT_MAGIC = 0x2BADB002;
 
-
 extern "C" void kernel_main() {
     uint32_t magic, mbi;
     // Retrieve magic number and multiboot info address
@@ -20,6 +19,9 @@ extern "C" void kernel_main() {
     memory_init(mbi);
     // identity map all memory and enable paging
     paging_init();
+
+    clear();
+    set_color(VGA_COLOR_RED);
     kprintf("Hello from XG OS!\n");
     for (;;) {}
 }
