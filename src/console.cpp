@@ -8,13 +8,33 @@ static volatile uint16_t* const VGA_BUFFER = (volatile uint16_t*)0xB8000;
 static size_t cursor_row = 0;
 static size_t cursor_col = 0;
 
+static inline void outb(uint16_t port, uint8_t value) {
+    asm volatile ("outb %0, %1" : : "a"(value), "Nd"(port));
+}
+
+static inline uint8_t inb(uint16_t port) {
+    uint8_t ret;
+    asm volatile ("inb %1, %0" : "=a"(ret) : "Nd"(port));
+    return ret;
+}
+
+static uint8_t current_color = (uint8_t)(0x07);
+
+static void update_cursor(void) {
+    uint16_t pos = (uint16_t)(cursor_row * VGA_WIDTH + cursor_col);
+    outb(0x3D4, 0x0E);
+    outb(0x3D5, (uint8_t)(pos >> 8));
+    outb(0x3D4, 0x0F);
+    outb(0x3D5, (uint8_t)(pos & 0xFF));
+}
+
 void kputc(char c) {
     if (c == '\n') {
         cursor_col = 0;
         cursor_row++;
     } else {
         size_t idx = cursor_row * VGA_WIDTH + cursor_col;
-        VGA_BUFFER[idx] = (uint16_t)c | (uint16_t)(0x07 << 8);
+        VGA_BUFFER[idx] = (uint16_t)c | (uint16_t)(current_color << 8);
         cursor_col++;
         if (cursor_col >= VGA_WIDTH) {
             cursor_col = 0;
@@ -22,18 +42,17 @@ void kputc(char c) {
         }
     }
     if (cursor_row >= VGA_HEIGHT) {
-        // scroll up
         for (size_t y = 1; y < VGA_HEIGHT; ++y) {
             for (size_t x = 0; x < VGA_WIDTH; ++x) {
                 VGA_BUFFER[(y - 1) * VGA_WIDTH + x] = VGA_BUFFER[y * VGA_WIDTH + x];
             }
         }
-        // clear last line
         for (size_t x = 0; x < VGA_WIDTH; ++x) {
-            VGA_BUFFER[(VGA_HEIGHT - 1) * VGA_WIDTH + x] = (uint16_t)' ' | (uint16_t)(0x07 << 8);
+            VGA_BUFFER[(VGA_HEIGHT - 1) * VGA_WIDTH + x] = (uint16_t)' ' | (uint16_t)(current_color << 8);
         }
         cursor_row = VGA_HEIGHT - 1;
     }
+    update_cursor();
 }
 
 void kprintf(const char* format, ...) {
@@ -104,4 +123,41 @@ void kprintf(const char* format, ...) {
 void panic(const char* msg) {
     kprintf("PANIC: %s\n", msg);
     for (;;) {}
+}
+
+uint8_t vga_make_color(vga_color fg, vga_color bg) {
+    return (uint8_t)fg | (uint8_t)(bg << 4);
+}
+
+void set_color(uint8_t color) {
+    current_color = color;
+}
+
+void clear() {
+    for (size_t y = 0; y < VGA_HEIGHT; ++y) {
+        for (size_t x = 0; x < VGA_WIDTH; ++x) {
+            VGA_BUFFER[y * VGA_WIDTH + x] = (uint16_t)' ' | (uint16_t)(current_color << 8);
+        }
+    }
+    cursor_row = 0;
+    cursor_col = 0;
+    update_cursor();
+}
+
+void set_cursor(size_t row, size_t col) {
+    cursor_row = row;
+    cursor_col = col;
+    update_cursor();
+}
+
+void enable_cursor() {
+    outb(0x3D4, 0x0A);
+    uint8_t val = inb(0x3D5) & ~0x20;
+    outb(0x3D5, val);
+}
+
+void disable_cursor() {
+    outb(0x3D4, 0x0A);
+    uint8_t val = inb(0x3D5) | 0x20;
+    outb(0x3D5, val);
 }
