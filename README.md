@@ -1,6 +1,6 @@
 # XG OS
 
-XG OS is a hobby operating system targeting the i686 architecture.  
+XG OS is a hobby operating system targeting the x86_64 architecture.  
 This repository follows the [Roadmap](ROADMAP.md) for guided development.
 
 ## Prerequisites
@@ -13,7 +13,7 @@ Git version control will be set up separately.
 ```bash
 mkdir -p build
 cd build
-cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-i686-elf.cmake ..
+cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-x86_64-elf.cmake ..
 make
 ```
 
