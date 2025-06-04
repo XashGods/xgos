@@ -18,7 +18,7 @@ typedef struct {
     uint32_t mmap_addr;
 } multiboot_info_t;
 
-// memory map entry (provided by multiboot)
+// memory map entry
 typedef struct __attribute__((packed)) {
     uint32_t size;
     uint64_t addr;
@@ -34,15 +34,16 @@ void memory_init(uint32_t mbi_addr);
 void memory_dump_map(uint32_t mbi_addr);
 
 // allocate a 4 KiB physical frame; returns physical address or 0 on failure
-uint32_t frame_alloc();
+uint64_t frame_alloc();
 
 // free a previously allocated 4 KiB physical frame
-void frame_free(uint32_t paddr);
+void frame_free(uint64_t paddr);
 
 // simple kernel heap allocator (bump allocator)
 // size: number of bytes to allocate
-void* kmalloc(size_t size);
+void *kmalloc(size_t size);
+
 // return number of physical frames detected
-uint32_t memory_get_nframes(void);
+uint64_t memory_get_nframes(void);
 
 #endif // MEMORY_H

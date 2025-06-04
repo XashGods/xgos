@@ -4,22 +4,22 @@ This document outlines the tools and environment required to build and run XG OS
 
 ## Cross-Compiler
 
-We target i686-elf. You need:
+We target x86_64-elf. You need:
 
-- **binutils** and **GCC** for `i686-elf`
+- **binutils** and **GCC** for `x86_64-elf`
 - Install a prebuilt toolchain or build your own. On Ubuntu:
   ```bash
   sudo apt-get install gcc-multilib build-essential bison flex libgmp-dev libmpfr-dev libmpc-dev texinfo
   # Download and build binutils
   wget https://ftp.gnu.org/gnu/binutils/binutils-with-gold-2.44.tar.xz
   tar xf binutils-with-gold-2.44.tar.xz && mkdir binutils-build && cd binutils-build
-  ../binutils-with-gold-2.44/configure --target=i686-elf --disable-nls --disable-werror --prefix="$HOME/opt/cross"
+  ../binutils-with-gold-2.44/configure --target=x86_64-elf --disable-nls --disable-werror --prefix="$HOME/opt/cross"
   make -j$(nproc) && make install
   cd ..
   # Download and build GCC
   wget https://ftp.gnu.org/gnu/gcc/gcc-15.1.0/gcc-15.1.0.tar.xz
   tar xf gcc-15.1.0.tar.xz && mkdir gcc-build && cd gcc-build
-  ../gcc-15.1.0/configure --target=i686-elf --disable-nls --disable-libstdcxx-pch --with-newlib --disable-shared --disable-threads --disable-multilib --disable-libssp --disable-libada --enable-languages=c,c++ --prefix="$HOME/opt/cross"
+  ../gcc-15.1.0/configure --target=x86_64-elf --disable-nls --disable-libstdcxx-pch --with-newlib --disable-shared --disable-threads --disable-multilib --disable-libssp --disable-libada --enable-languages=c,c++ --prefix="$HOME/opt/cross"
   make -j$(nproc) all-gcc && make install-gcc
   make -j$(nproc) all-target-libgcc && make install-target-libgcc
   ```

@@ -16,20 +16,20 @@ rm -rf "$BUILD_DIR" "$ISO_DIR" "$ISO_NAME"
 ## Build the kernel (using cross-toolchain)
 # Detect and add freestanding cross-compiler
 CROSS_BIN=${CROSS_BIN:-"$HOME/opt/cross/bin"}
-if [ -x "$CROSS_BIN/i686-elf-gcc" ]; then
+if [ -x "$CROSS_BIN/x86_64-elf-gcc" ]; then
   echo "[*] Found cross-compiler at $CROSS_BIN"
   export PATH="$CROSS_BIN:$PATH"
-elif command -v i686-elf-gcc >/dev/null 2>&1; then
+elif command -v x86_64-elf-gcc >/dev/null 2>&1; then
   echo "[*] Using cross-compiler from PATH"
 else
-  echo "Error: i686-elf-gcc not found."
-  echo "Please install the freestanding cross toolchain and ensure i686-elf-gcc is in PATH or set CROSS_BIN."
+  echo "Error: x86_64-elf-gcc not found."
+  echo "Please install the freestanding cross toolchain and ensure x86_64-elf-gcc is in PATH or set CROSS_BIN."
   exit 1
 fi
 
-echo "[1/4] Configuring project with i686-elf toolchain..."
+echo "[1/4] Configuring project with x86_64-elf toolchain..."
 cmake -B "$BUILD_DIR" -S . \
-      -DCMAKE_TOOLCHAIN_FILE="$(pwd)/cmake/Toolchain-i686-elf.cmake"
+      -DCMAKE_TOOLCHAIN_FILE="$(pwd)/cmake/Toolchain-x86_64-elf.cmake"
 echo "[2/4] Building kernel..."
 cmake --build "$BUILD_DIR"
 
