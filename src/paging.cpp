@@ -177,3 +177,27 @@ uint64_t paging_get_physical(uint64_t virt_addr) {
 
     return get_phys_addr(pt_table[pt_index]) + (virt_addr & 0xFFF);
 }
+
+// map framebuffer memory region to virtual memory with proper flags
+int paging_map_framebuffer(uint64_t phys_addr, uint64_t size) {
+    if (!pml4_table) {
+        kprintf("paging_map_framebuffer: PML4 not initialized\n");
+        return -1;
+    }
+
+    // round size up to page boundary
+    size = (size + 4095) & ~4095ULL;
+
+    // map framebuffer with identity mapping (virtual = physical)
+    uint64_t flags = PAGE_PRESENT | PAGE_RW | PAGE_CACHE_DISABLE;
+
+    kprintf("paging: mapping framebuffer 0x%lx size 0x%lx\n", phys_addr, size);
+
+    for (uint64_t offset = 0; offset < size; offset += 4096) {
+        uint64_t addr = phys_addr + offset;
+        paging_map_page(addr, addr, flags);
+    }
+
+    kprintf("paging: framebuffer mapping complete\n");
+    return 0;
+}
