@@ -22,9 +22,11 @@ add_executable(kernel
         src/console.cpp
         src/memory.cpp
         src/paging.cpp
+        src/math.cpp
+        src/graphics.cpp
+        src/graphics_demo.cpp
         src/kernel.cpp
         linker.ld
-        src/memory.cpp
 )
 
 target_link_options(kernel PRIVATE 

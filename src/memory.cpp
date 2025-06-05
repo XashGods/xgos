@@ -5,9 +5,13 @@
 
 extern "C" uint64_t __bss_end;
 
+// multiboot framebuffer flag bit
+#define MULTIBOOT_INFO_FRAMEBUFFER_INFO 0x800
+
 static uint8_t *frame_bitmap = nullptr;
 static uint64_t nframes = 0;
 static uint64_t bitmap_size = 0; // bytes
+
 
 // frame bitmap helpers (mark/test frames)
 static inline void frame_set(uint64_t idx) { frame_bitmap[idx / 8] |= (uint8_t) (1 << (idx % 8)); }
@@ -183,4 +187,49 @@ void *kmalloc(size_t size) {
 // return number of physical frames detected
 uint64_t memory_get_nframes(void) {
     return nframes;
+}
+
+// framebuffer detection and setup
+// returns 1 if framebuffer is available, 0 otherwise
+int framebuffer_detect(uint32_t mbi_addr) {
+    multiboot_info_t *mbi = (multiboot_info_t *) (uintptr_t) mbi_addr;
+
+    // check if framebuffer info is available
+    if (!(mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO)) {
+        kprintf("framebuffer_detect: no framebuffer info in multiboot\n");
+        return 0;
+    }
+
+    // check framebuffer type (0 = indexed color, 1 = direct RGB, 2 = EGA text)
+    if (mbi->framebuffer_type != 1) {
+        kprintf("framebuffer_detect: framebuffer type %u not supported (need RGB)\n",
+                mbi->framebuffer_type);
+        return 0;
+    }
+
+    // check if we have a valid framebuffer address
+    if (mbi->framebuffer_addr == 0) {
+        kprintf("framebuffer_detect: invalid framebuffer address\n");
+        return 0;
+    }
+
+    kprintf("framebuffer_detect: found framebuffer at 0x%x\n",
+            (uint32_t) mbi->framebuffer_addr);
+    kprintf("  dimensions: %ux%u, bpp: %u, pitch: %u\n",
+            mbi->framebuffer_width, mbi->framebuffer_height,
+            mbi->framebuffer_bpp, mbi->framebuffer_pitch);
+
+    return 1;
+}
+
+// get framebuffer information from multiboot
+void framebuffer_get_info(uint32_t mbi_addr, uint64_t *addr, uint32_t *width,
+                          uint32_t *height, uint32_t *pitch, uint8_t *bpp) {
+    multiboot_info_t *mbi = (multiboot_info_t *) (uintptr_t) mbi_addr;
+
+    if (addr) *addr = mbi->framebuffer_addr;
+    if (width) *width = mbi->framebuffer_width;
+    if (height) *height = mbi->framebuffer_height;
+    if (pitch) *pitch = mbi->framebuffer_pitch;
+    if (bpp) *bpp = mbi->framebuffer_bpp;
 }

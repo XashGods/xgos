@@ -7,7 +7,7 @@ SECTIONS
     . = 1M;
     
     .text ALIGN(4K) : {
-        *(.text*)i
+        *(.text*)
     }
     
     .rodata ALIGN(4K) : {

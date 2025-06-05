@@ -1,4 +1,3 @@
-// Paging setup: 64-bit paging with 4-level page tables
 #ifndef PAGING_H
 #define PAGING_H
 
@@ -20,6 +19,9 @@ void paging_unmap_page(uint64_t virt_addr);
 
 // get physical address for a virtual address (page table walk)
 uint64_t paging_get_physical(uint64_t virt_addr);
+
+// map framebuffer memory region to virtual memory
+int paging_map_framebuffer(uint64_t phys_addr, uint64_t size);
 
 #ifdef __cplusplus
 }

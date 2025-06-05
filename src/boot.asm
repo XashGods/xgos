@@ -5,13 +5,46 @@ bits 32
 section .text
     align 4
     dd 0x1BADB002                   ; Multiboot header magic
-    dd 0x00000003                   ; Flags: align modules, memory information
-    dd -(0x1BADB002 + 0x00000003)   ; Checksum
+    dd 0x00000007                   ; Flags: align modules, memory info, framebuffer
+    dd -(0x1BADB002 + 0x00000007)   ; Checksum
+    dd 0                            ; header_addr (unused for ELF)
+    dd 0                            ; load_addr (unused for ELF)
+    dd 0                            ; load_end_addr (unused for ELF)
+    dd 0                            ; bss_end_addr (unused for ELF)
+    dd 0                            ; entry_addr (unused for ELF)
+    dd 0                            ; mode_type (0 = linear graphics)
+    dd 1024                         ; width
+    dd 768                          ; height
+    dd 32                           ; depth
     global _start
     extern kernel_main
     extern init_global_ctors
 
 _start:
+    ; switch to long mode
+    mov esp, stack_top
+    
+    ; save multiboot info
+    mov [multiboot_magic], eax
+    mov [multiboot_info], ebx
+    
+    ; Note: VESA setup must be done before entering protected mode
+    ; Since we're already in protected mode from GRUB, we'll handle
+    ; graphics initialization in the kernel using available multiboot info
+    
+    ; check for CPUID support
+    call check_cpuid
+    call check_long_mode
+    
+    ; set up paging for long mode
+    call setup_page_tables
+    call enable_paging
+    
+    ; load GDT
+    lgdt [gdt64.pointer]
+    
+    ; jump to long mode
+    jmp gdt64.code:long_mode_start
     ; switch to long mode
     mov esp, stack_top
     
